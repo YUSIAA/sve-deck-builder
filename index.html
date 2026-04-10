@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>SVE プロフェッショナル・デッキビルダ―</title>
+    <title>SVE デッキビルダ―</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -157,8 +157,10 @@
                                  <div class="action-btns"><button class="btn-detail" onclick="showDetails('${id}')">詳細</button><button class="btn-add" onclick="addCard('${id}')">追加</button></div>`;
             } else {
                 const img = document.createElement('img'); img.dataset.id = id; img.onclick = () => showDetails(id); imageObserver.observe(img);
-                const tag = c.common.type === "Advance" ? "ADV" : (c.common.isEvolve ? "EVO" : "");
-                div.innerHTML = `<div class="add-overlay" onclick="addCard('${id}')">＋</div>${tag ? `<div class="card-label">${tag}</div>` : ''}`;
+                
+                // --- 修正箇所：EVOタグ生成を削除 ---
+                // 以前はここに "${tag ? `<div class="card-label">${tag}</div>` : ''}" がありましたが、削除しました。
+                div.innerHTML = `<div class="add-overlay" onclick="addCard('${id}')">＋</div>`;
                 div.prepend(img);
             }
             frag.appendChild(div);
@@ -204,7 +206,7 @@
         for (const id in deck) {
             const c = masterData[id]; const item = { id, c, count: deck[id] };
             if (c.common.isEvolve || c.common.type === "Advance") { ec += deck[id]; evo.push(item); }
-            else { mc += deck[id]; main.push(item); }
+            else { mc += deck[id]; main.push({id, c, count: deck[id]}); }
         }
         const deckSorter = (a, b) => {
             const costA = parseInt(a.c.common.cost) || 0; const costB = parseInt(b.c.common.cost) || 0;
