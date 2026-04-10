@@ -1,8 +1,0 @@
-{
-  "name": "SVE Deck Builder",
-  "short_name": "SVEビルダー",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3498db"
-}
