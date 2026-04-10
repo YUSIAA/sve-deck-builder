@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>SVE デッキビルダ―</title>
+    <title>SVE プロフェッショナル・デッキビルダ―</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,15 +17,11 @@
                 <input type="text" id="search-tribe" style="width:100%; box-sizing:border-box;" placeholder="種族サジェスト..." oninput="handleTribeInput(this)" onfocus="handleTribeInput(this)">
                 <div id="tribe-suggest-list" class="suggest-list"></div>
             </div>
-
             <select id="filter-class" onchange="filterCards()">
                 <option value="">全てのクラス</option>
-                <option value="Forestcraft">エルフ</option>
-                <option value="Swordcraft">ロイヤル</option>
-                <option value="Runecraft">ウィッチ</option>
-                <option value="Dragoncraft">ドラゴン</option>
-                <option value="Abysscraft">ナイトメア</option>
-                <option value="Havencraft">ビショップ</option>
+                <option value="Forestcraft">エルフ</option><option value="Swordcraft">ロイヤル</option>
+                <option value="Runecraft">ウィッチ</option><option value="Dragoncraft">ドラゴン</option>
+                <option value="Abysscraft">ナイトメア</option><option value="Havencraft">ビショップ</option>
                 <option value="Neutral">ニュートラル</option>
             </select>
             <select id="filter-cost" onchange="filterCards()">
@@ -33,7 +29,6 @@
                 <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
                 <option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8+</option>
             </select>
-
             <button id="btn-toggle-view" class="btn-view-toggle" onclick="toggleViewMode('lib')">画像表示に切替</button>
         </div>
         <div id="card-pool" class="scroll-area"></div>
@@ -44,7 +39,6 @@
             <h2 style="margin:0;">デッキ (M:<span id="main-count">0</span> E:<span id="evolve-count">0</span>)</h2>
             <button id="btn-toggle-deck-view" class="btn-view-toggle" onclick="toggleViewMode('deck')">画像表示に切替</button>
         </div>
-
         <div class="mana-curve-container">
             <div class="chart-area" id="mana-curve">
                 <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">0</span></div>
@@ -58,9 +52,7 @@
                 <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">8+</span></div>
             </div>
         </div>
-
         <div id="deck-list" class="scroll-area"></div>
-        
         <button class="btn-export" onclick="exportToArena()">TCG-Arena用に出力</button>
         <textarea id="export-text" rows="4" readonly placeholder="Output list..."></textarea>
         <button class="btn-copy" onclick="copyToClipboard()">結果をコピー</button>
@@ -80,30 +72,18 @@
 </div>
 
 <script>
-    let masterData = {};
-    let tribeList = [];
-    let deck = {};
-    let viewModeLib = 'list';
-    let viewModeDeck = 'list';
-
-    const classMap = {
-        'Forestcraft': 'エルフ', 'Swordcraft': 'ロイヤル', 'Runecraft': 'ウィッチ',
-        'Dragoncraft': 'ドラゴン', 'Abysscraft': 'ナイトメア', 'Havencraft': 'ビショップ', 'Neutral': 'ニュートラル'
-    };
+    let masterData = {}; let tribeList = []; let deck = {};
+    let viewModeLib = 'list'; let viewModeDeck = 'list';
+    const classMap = { 'Forestcraft': 'エルフ', 'Swordcraft': 'ロイヤル', 'Runecraft': 'ウィッチ', 'Dragoncraft': 'ドラゴン', 'Abysscraft': 'ナイトメア', 'Havencraft': 'ビショップ', 'Neutral': 'ニュートラル' };
 
     const imageObserver = new IntersectionObserver((entries, obs) => {
         entries.forEach(e => { if (e.isIntersecting) { loadImg(e.target); obs.unobserve(e.target); } });
     }, { rootMargin: '300px' });
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 変更後（同じフォルダにあるJSONファイルを直接読み込む）
-        fetch('./master_card_data.json')
-        .then(r => r.json())
-        .then(d => { masterData = d; renderCardPool(); });
-
-        fetch('./tribes.json')
-        .then(r => r.json())
-        .then(d => { tribeList = Object.keys(d); });
+        // APIではなく、直接JSONファイルを読み込むように修正
+        fetch('./master_card_data.json').then(r => r.json()).then(d => { masterData = d; renderCardPool(); });
+        fetch('./tribes.json').then(r => r.json()).then(d => { tribeList = Object.keys(d); });
         document.addEventListener('click', e => { if (!e.target.closest('.suggest-container')) document.getElementById('tribe-suggest-list').style.display = 'none'; });
     });
 
@@ -120,13 +100,9 @@
     }
 
     function getUrls(id, card) {
-        const isU = id.endsWith("u");
-        const clean = isU ? id.slice(0, -1) : id;
-        const f = clean.split("-")[0].toUpperCase();
-        const b = clean.toLowerCase();
-        const ub = b.replace("-", "_");
-        let u = [];
-        if (card.jp && card.jp.image) u.push(card.jp.image);
+        const isU = id.endsWith("u"); const clean = isU ? id.slice(0, -1) : id;
+        const f = clean.split("-")[0].toUpperCase(); const b = clean.toLowerCase(); const ub = b.replace("-", "_");
+        let u = []; if (card.jp && card.jp.image) u.push(card.jp.image);
         if (isU) {
             u.push(`https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}_ura.png`,
                    `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}_back.png`,
@@ -154,10 +130,7 @@
     }
 
     function showDetails(id) {
-        const c = masterData[id];
-        const mImg = document.getElementById('modal-card-img');
-        const urls = getUrls(id, c);
-        let i = 0;
+        const c = masterData[id]; const mImg = document.getElementById('modal-card-img'); const urls = getUrls(id, c); let i = 0;
         mImg.onerror = function() { i++; if (i < urls.length) this.src = urls[i]; else this.src = ""; };
         mImg.src = urls[0];
         const tags = (c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span> ' : '') + (c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '');
@@ -170,16 +143,13 @@
     function closeModal() { document.getElementById('card-modal').style.display = 'none'; }
 
     function renderCardPool() {
-        const pool = document.getElementById('card-pool');
-        pool.innerHTML = '';
+        const pool = document.getElementById('card-pool'); pool.innerHTML = '';
         pool.className = 'scroll-area' + (viewModeLib === 'gallery' ? ' gallery-grid' : '');
         const frag = document.createDocumentFragment();
         for (const id in masterData) {
-            const c = masterData[id];
-            const div = document.createElement('div');
+            const c = masterData[id]; const div = document.createElement('div');
             div.className = viewModeLib === 'list' ? 'card-row' : 'card-item-wrapper';
             div.dataset.name = c.jp.name; div.dataset.text = c.jp.text || ""; div.dataset.tribe = c.jp.tribe || ""; div.dataset.class = c.common.class; div.dataset.cost = c.common.cost;
-            
             if (viewModeLib === 'list') {
                 const jpClass = classMap[c.common.class] || c.common.class;
                 const tags = (c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span> ' : '') + (c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '');
@@ -212,9 +182,7 @@
     }
 
     function handleTribeInput(el) {
-        const val = el.value.toLowerCase();
-        const list = document.getElementById('tribe-suggest-list');
-        list.innerHTML = '';
+        const val = el.value.toLowerCase(); const list = document.getElementById('tribe-suggest-list'); list.innerHTML = '';
         const matches = tribeList.filter(t => t.toLowerCase().includes(val)).slice(0, 12);
         matches.forEach(m => {
             const d = document.createElement('div'); d.className = 'suggest-item'; d.innerText = m;
@@ -230,49 +198,31 @@
     function removeAll(id) { if (deck[id]) { delete deck[id]; updateUI(); } }
     function updateUI() { renderDeckList(); updateManaCurve(); }
 
-    // --- デッキ描画 (ソートロジック搭載) ---
     function renderDeckList() {
-        const list = document.getElementById('deck-list');
-        list.innerHTML = '';
-        let mc = 0, ec = 0;
-        const main = [], evo = [];
-
+        const list = document.getElementById('deck-list'); list.innerHTML = '';
+        let mc = 0; let ec = 0; const main = []; const evo = [];
         for (const id in deck) {
-            const c = masterData[id];
-            const item = { id, c, count: deck[id] };
+            const c = masterData[id]; const item = { id, c, count: deck[id] };
             if (c.common.isEvolve || c.common.type === "Advance") { ec += deck[id]; evo.push(item); }
             else { mc += deck[id]; main.push(item); }
         }
-
-        // --- ソート関数の定義 (コスト順 -> カード名順) ---
         const deckSorter = (a, b) => {
-            const costA = parseInt(a.c.common.cost) || 0;
-            const costB = parseInt(b.c.common.cost) || 0;
-            if (costA !== costB) return costA - costB;
-            return a.c.jp.name.localeCompare(b.c.jp.name, 'ja');
+            const costA = parseInt(a.c.common.cost) || 0; const costB = parseInt(b.c.common.cost) || 0;
+            if (costA !== costB) return costA - costB; return a.c.jp.name.localeCompare(b.c.jp.name, 'ja');
         };
-
-        main.sort(deckSorter);
-        evo.sort(deckSorter);
-
-        document.getElementById('main-count').innerText = mc;
-        document.getElementById('evolve-count').innerText = ec;
+        main.sort(deckSorter); evo.sort(deckSorter);
+        document.getElementById('main-count').innerText = mc; document.getElementById('evolve-count').innerText = ec;
 
         const createSection = (cards, title) => {
             if (!cards.length) return;
-            const t = document.createElement('div'); t.className = 'deck-section-title'; t.innerText = title;
-            list.appendChild(t);
-
+            const t = document.createElement('div'); t.className = 'deck-section-title'; t.innerText = title; list.appendChild(t);
             if (viewModeDeck === 'gallery') {
                 const g = document.createElement('div'); g.className = 'deck-grid';
                 cards.forEach(item => {
                     const w = document.createElement('div'); w.className = 'card-item-wrapper';
                     const urls = getUrls(item.id, item.c);
-                    w.innerHTML = `
-                        <div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div>
-                        <div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div>
-                        <img class="loaded" src="${urls[0]}" onclick="showDetails('${item.id}')" style="opacity:1;">
-                        <div class="card-count-badge">${item.count}</div>`;
+                    w.innerHTML = `<div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div><div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div>
+                                   <img class="loaded" src="${urls[0]}" onclick="showDetails('${item.id}')" style="opacity:1;"><div class="card-count-badge">${item.count}</div>`;
                     g.appendChild(w);
                 });
                 list.appendChild(g);
@@ -281,40 +231,31 @@
                     const row = document.createElement('div'); row.className = 'card-row';
                     const tags = (item.c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span> ' : '') + (item.c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '');
                     row.innerHTML = `<div><div class="card-name">${item.c.jp.name} x${item.count} ${tags}</div><div class="card-info">${item.c.common.cost}コスト</div></div>
-                                     <div class="action-btns"><button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button>
-                                     <button class="btn-minus-one" onclick="removeOne('${item.id}')">－</button>
-                                     <button class="btn-delete-all" onclick="removeAll('${item.id}')">×</button></div>`;
+                                     <div class="action-btns"><button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button><button class="btn-minus-one" onclick="removeOne('${item.id}')">－</button><button class="btn-delete-all" onclick="removeAll('${item.id}')">×</button></div>`;
                     list.appendChild(row);
                 });
             }
         };
-        createSection(main, 'メインデッキ');
-        createSection(evo, 'エボルヴデッキ');
+        createSection(main, 'メインデッキ'); createSection(evo, 'エボルヴデッキ');
     }
 
     function updateManaCurve() {
         const counts = new Array(9).fill(0);
         for (const id in deck) {
             const c = masterData[id];
-            if (!c.common.isEvolve && c.common.type !== "Advance") {
-                const cost = parseInt(c.common.cost) || 0;
-                counts[cost >= 8 ? 8 : cost] += deck[id];
-            }
+            if (!c.common.isEvolve && c.common.type !== "Advance") { const cost = parseInt(c.common.cost) || 0; counts[cost >= 8 ? 8 : cost] += deck[id]; }
         }
         const max = Math.max(...counts, 1);
         Array.from(document.getElementById('mana-curve').children).forEach((w, i) => {
             w.querySelector('.bar').style.height = (counts[i] / max * 60) + 'px';
-            w.querySelector('.bar-count').innerText = counts[i];
-            w.querySelector('.bar-count').style.visibility = counts[i] > 0 ? 'visible' : 'hidden';
+            w.querySelector('.bar-count').innerText = counts[i]; w.querySelector('.bar-count').style.visibility = counts[i] > 0 ? 'visible' : 'hidden';
         });
     }
 
     function exportToArena() {
-        let r = "";
-        for (const id in deck) {
+        let r = ""; for (const id in deck) {
             let n = masterData[id].en?.name || masterData[id].jp.name;
-            if (masterData[id].common.isEvolve && !n.includes("(Evolved)")) n += " (Evolved)";
-            r += `${deck[id]} ${n}\n`;
+            if (masterData[id].common.isEvolve && !n.includes("(Evolved)")) n += " (Evolved)"; r += `${deck[id]} ${n}\n`;
         }
         document.getElementById('export-text').value = r + "Sideboard:";
     }
