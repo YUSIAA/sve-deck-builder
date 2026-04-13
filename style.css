@@ -29,15 +29,15 @@ body {
 
 /* --- ボタンデザイン --- */
 button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-weight: bold; font-size: 13px; transition: 0.2s; color: white; font-family: inherit; }
-.btn-view-toggle { background: #34495e; }
+.btn-view-toggle { background: #34495e; } /* ネイビー */
 .btn-view-toggle:hover { background: #2c3e50; }
-.btn-add { background: #3498db; }
+.btn-add { background: #3498db; } /* 青 */
 .btn-detail { background: #edf2f7; color: #4a5568; }
 .btn-detail:hover { background: #e2e8f0; }
 
 /* デッキ内ボタン（リスト用） */
-.btn-minus-one { background: #f39c12; }
-.btn-delete-all { background: #e74c3c; }
+.btn-minus-one { background: #f39c12; } /* オレンジ */
+.btn-delete-all { background: #e74c3c; } /* 赤 */
 
 /* デッキ内画像上のボタン */
 .btn-remove-img { position: absolute; top: -8px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
@@ -47,7 +47,7 @@ button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; f
 .btn-export { background: #48bb78; width: 100%; padding: 14px; margin-top: 10px; font-size: 15px; }
 .btn-copy { background: #4a5568; width: 100%; margin-top: 5px; }
 
-/* --- カード表示・重なり防止 --- */
+/* --- カード表示・グリッド --- */
 .card-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f4f8; }
 .card-name { font-weight: bold; font-size: 14px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
 .evolve-tag { font-size: 9px; color: #fff; background: #e74c3c; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
@@ -63,6 +63,28 @@ button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; f
 
 .add-overlay { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(52,152,219,0.95); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border: 2px solid white; z-index: 5; font-size: 20px; }
 .card-item-wrapper:hover .add-overlay { opacity: 1; }
+.card-count-badge { position: absolute; bottom: 0; right: 0; background: rgba(44, 62, 80, 0.95); color: white; padding: 2px 10px; border-radius: 8px 0 8px 0; font-weight: bold; font-size: 16px; min-width: 24px; text-align: center; border-top: 1px solid rgba(255,255,255,0.3); z-index: 4; }
+
+/* デッキ内セクション */
+.deck-section-title { font-size: 15px; font-weight: bold; margin: 20px 0 10px 10px; padding-left: 10px; border-left: 5px solid #e74c3c; color: #2d3748; }
+
+/* --- マナカーブ --- */
+.mana-curve-container { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e2e8f0; }
+.chart-area { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; padding: 0 5px; }
+.bar-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.bar { width: 16px; background: #3498db; border-radius: 3px 3px 0 0; transition: height 0.3s ease; }
+.bar-label { font-size: 10px; color: #95a5a6; margin-top: 4px; }
+.bar-count { font-size: 10px; font-weight: bold; margin-bottom: 2px; color: #34495e; }
+
+/* --- モーダル --- */
+.modal-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); }
+.modal-content { background: white; margin: 5vh auto; padding: 0; border-radius: 16px; width: 90%; max-width: 850px; display: flex; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+.modal-left { flex: 1; background: #1a202c; display: flex; align-items: center; justify-content: center; min-height: 500px; }
+.modal-left img { max-width: 90%; max-height: 85vh; object-fit: contain; }
+.modal-right { flex: 1; padding: 35px; position: relative; overflow-y: auto; }
+.modal-close { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; color: #a0aec0; }
+.modal-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.modal-text { font-size: 15px; line-height: 1.8; white-space: pre-wrap; color: #2d3748; border-top: 1px solid #edf2f7; padding-top: 20px; margin-top: 20px; }
 .card-count-badge { position: absolute; bottom: 0; right: 0; background: rgba(44, 62, 80, 0.95); color: white; padding: 2px 10px; border-radius: 8px 0 8px 0; font-weight: bold; font-size: 16px; min-width: 24px; text-align: center; border-top: 1px solid rgba(255,255,255,0.3); z-index: 4; }
 
 /* EVOタグ用のスタイル定義を削除 */
