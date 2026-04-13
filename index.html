@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SVE プロフェッショナル・デッキビルダ―</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -9,17 +10,16 @@
 
 <div class="container">
     <div class="panel left-panel">
-        <h2 style="margin:0 0 15px 0;">カードライブラリ</h2>
+        <h2 style="margin:0 0 10px 0; font-size:18px;">カードライブラリ</h2>
         <div class="filter-bar">
-            <input type="text" id="search-name" class="input-name" placeholder="カード名検索..." oninput="filterCards()">
-            <input type="text" id="search-ability" class="input-ability" placeholder="能力・テキスト検索..." oninput="filterCards()">
+            <input type="text" id="search-name" class="input-name" placeholder="名前..." oninput="filterCards()">
+            <input type="text" id="search-ability" class="input-ability" placeholder="能力..." oninput="filterCards()">
             <div class="suggest-container">
-                <input type="text" id="search-tribe" style="width:100%; box-sizing:border-box;" placeholder="種族サジェスト..." oninput="handleTribeInput(this)" onfocus="handleTribeInput(this)">
+                <input type="text" id="search-tribe" style="width:100%; box-sizing:border-box;" placeholder="種族..." oninput="handleTribeInput(this)" onfocus="handleTribeInput(this)">
                 <div id="tribe-suggest-list" class="suggest-list"></div>
             </div>
-
             <select id="filter-class" onchange="filterCards()">
-                <option value="">全てのクラス</option>
+                <option value="">クラス</option>
                 <option value="Forestcraft">エルフ</option><option value="Swordcraft">ロイヤル</option>
                 <option value="Runecraft">ウィッチ</option><option value="Dragoncraft">ドラゴン</option>
                 <option value="Abysscraft">ナイトメア</option><option value="Havencraft">ビショップ</option>
@@ -30,37 +30,33 @@
                 <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
                 <option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8+</option>
             </select>
-
             <button id="btn-toggle-view" class="btn-view-toggle" onclick="toggleViewMode('lib')">画像表示に切替</button>
         </div>
         <div id="card-pool" class="scroll-area"></div>
     </div>
 
     <div class="panel right-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h2 style="margin:0;">デッキ (M:<span id="main-count">0</span> E:<span id="evolve-count">0</span>)</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h2 style="margin:0; font-size:18px;">デッキ (M:<span id="main-count">0</span> E:<span id="evolve-count">0</span>)</h2>
             <button id="btn-toggle-deck-view" class="btn-view-toggle" onclick="toggleViewMode('deck')">画像表示に切替</button>
         </div>
-
         <div class="mana-curve-container">
             <div class="chart-area" id="mana-curve">
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">0</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">1</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">2</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">3</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">4</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">5</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">6</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">7</span></div>
-                <div class="bar-wrapper"><span class="bar-count">0</span><div class="bar" style="height:0px"></div><span class="bar-label">8+</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">0</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">1</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">2</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">3</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">4</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">5</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">6</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">7</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">8+</span></div>
             </div>
         </div>
-
         <div id="deck-list" class="scroll-area"></div>
-        
         <button class="btn-export" onclick="exportToArena()">TCG-Arena用に出力</button>
-        <textarea id="export-text" rows="4" readonly placeholder="Output list..."></textarea>
-        <button class="btn-copy" onclick="copyToClipboard()">結果をコピー</button>
+        <textarea id="export-text" rows="3" readonly placeholder="Output list..."></textarea>
+        <button class="btn-copy" style="background:#4a5568; width:100%; margin-top:5px;" onclick="copyToClipboard()">コピー</button>
     </div>
 </div>
 
@@ -70,32 +66,22 @@
         <div class="modal-right">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <div id="modal-card-name" class="modal-title"></div>
-            <div id="modal-card-tribe" style="background:#f1f5f9; padding:5px 12px; border-radius:6px; font-size:13px; display:inline-block; margin-bottom:20px; color:#475569;"></div>
-            <div id="modal-card-text" class="modal-text"></div>
+            <div id="modal-card-tribe" style="background:#f1f5f9; padding:5px 12px; border-radius:6px; font-size:13px; display:inline-block; margin-bottom:15px; color:#475569;"></div>
+            <div id="modal-card-text" style="font-size:14px; line-height:1.6; white-space:pre-wrap; border-top:1px solid #eee; padding-top:10px;"></div>
         </div>
     </div>
 </div>
 
 <script>
     let masterData = {}; let tribeList = []; let deck = {};
-    
-    // 初期表示をすべて文字(list)に設定
-    let viewModeLib = 'list';
-    let viewModeDeck = 'list';
+    let viewModeLib = 'list'; let viewModeDeck = 'list';
+    const classMap = { 'Forestcraft': 'エルフ', 'Swordcraft': 'ロイヤル', 'Runecraft': 'ウィッチ', 'Dragoncraft': 'ドラゴン', 'Abysscraft': 'ナイトメア', 'Havencraft': 'ビショップ', 'Neutral': 'ニュートラル' };
 
-    // クラス名の日本語マッピング
-    const classMap = {
-        'Forestcraft': 'エルフ', 'Swordcraft': 'ロイヤル', 'Runecraft': 'ウィッチ',
-        'Dragoncraft': 'ドラゴン', 'Abysscraft': 'ナイトメア', 'Havencraft': 'ビショップ', 'Neutral': 'ニュートラル'
-    };
-
-    // Lazy Load 用 Observer
     const imageObserver = new IntersectionObserver((entries, obs) => {
         entries.forEach(e => { if (e.isIntersecting) { loadImg(e.target); obs.unobserve(e.target); } });
     }, { rootMargin: '300px' });
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 直接JSONファイルを読み込む
         fetch('./master_card_data.json').then(r => r.json()).then(d => { masterData = d; renderCardPool(); });
         fetch('./tribes.json').then(r => r.json()).then(d => { tribeList = Object.keys(d); });
         document.addEventListener('click', e => { if (!e.target.closest('.suggest-container')) document.getElementById('tribe-suggest-list').style.display = 'none'; });
@@ -113,7 +99,6 @@
         }
     }
 
-    // 画像URLリトライロジック
     function getUrls(id, card) {
         const isU = id.endsWith("u"); const clean = isU ? id.slice(0, -1) : id;
         const f = clean.split("-")[0].toUpperCase(); const b = clean.toLowerCase(); const ub = b.replace("-", "_");
@@ -129,7 +114,6 @@
                    `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}.png`,
                    `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}_front.png`);
         }
-        if (card.en && card.en.image) u.push(card.en.image);
         return [...new Set(u)].filter(v => v);
     }
 
@@ -148,8 +132,7 @@
         const c = masterData[id]; const mImg = document.getElementById('modal-card-img'); const urls = getUrls(id, c); let i = 0;
         mImg.onerror = function() { i++; if (i < urls.length) this.src = urls[i]; else this.src = ""; };
         mImg.src = urls[0];
-        const tags = (c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span> ' : '') + (c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '');
-        document.getElementById('modal-card-name').innerHTML = c.jp.name + " " + tags;
+        document.getElementById('modal-card-name').innerText = c.jp.name;
         document.getElementById('modal-card-tribe').innerText = c.jp.tribe || "なし";
         document.getElementById('modal-card-text').innerText = c.jp.text || "テキストなし";
         document.getElementById('card-modal').style.display = 'block';
@@ -167,8 +150,8 @@
             div.dataset.name = c.jp.name; div.dataset.text = c.jp.text || ""; div.dataset.tribe = c.jp.tribe || ""; div.dataset.class = c.common.class; div.dataset.cost = c.common.cost;
             if (viewModeLib === 'list') {
                 const jpClass = classMap[c.common.class] || c.common.class;
-                const tags = (c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span> ' : '') + (c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '');
-                div.innerHTML = `<div><div class="card-name">${c.jp.name} ${tags}</div><div class="card-info">${jpClass} | ${c.common.cost}コスト</div></div>
+                const evTag = c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span>' : '';
+                div.innerHTML = `<div class="card-info-group"><div class="card-name">${c.jp.name} ${evTag}</div><div style="font-size:11px; color:#666;">${jpClass} | ${c.common.cost}コスト</div></div>
                                  <div class="action-btns"><button class="btn-detail" onclick="showDetails('${id}')">詳細</button><button class="btn-add" onclick="addCard('${id}')">追加</button></div>`;
             } else {
                 const img = document.createElement('img'); img.dataset.id = id; img.onclick = () => showDetails(id); imageObserver.observe(img);
@@ -207,7 +190,6 @@
         filterCards();
     }
 
-    // デッキ操作
     function addCard(id) { if ((deck[id] || 0) < 3) { deck[id] = (deck[id] || 0) + 1; updateUI(); } }
     function removeOne(id) { if (deck[id]) { deck[id]--; if (!deck[id]) delete deck[id]; updateUI(); } }
     function removeAll(id) { if (deck[id]) { delete deck[id]; updateUI(); } }
@@ -221,10 +203,7 @@
             if (c.common.isEvolve || c.common.type === "Advance") { ec += deck[id]; evo.push(item); }
             else { mc += deck[id]; main.push(item); }
         }
-        const deckSorter = (a, b) => {
-            const costA = parseInt(a.c.common.cost) || 0; const costB = parseInt(b.c.common.cost) || 0;
-            if (costA !== costB) return costA - costB; return a.c.jp.name.localeCompare(b.c.jp.name, 'ja');
-        };
+        const deckSorter = (a, b) => (parseInt(a.c.common.cost) || 0) - (parseInt(b.c.common.cost) || 0) || a.c.jp.name.localeCompare(b.c.jp.name, 'ja');
         main.sort(deckSorter); evo.sort(deckSorter);
         document.getElementById('main-count').innerText = mc; document.getElementById('evolve-count').innerText = ec;
 
@@ -235,26 +214,21 @@
                 const g = document.createElement('div'); g.className = 'deck-grid';
                 cards.forEach(item => {
                     const w = document.createElement('div'); w.className = 'card-item-wrapper';
-                    const img = document.createElement('img');
-                    img.dataset.id = item.id; img.onclick = () => showDetails(item.id); imageObserver.observe(img);
-
-                    w.innerHTML = `<div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div><div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div>
-                                   <div class="card-count-badge">${item.count}</div>`;
-                    w.prepend(img);
-                    g.appendChild(w);
+                    const img = document.createElement('img'); img.dataset.id = item.id; img.onclick = () => showDetails(item.id); imageObserver.observe(img);
+                    w.innerHTML = `<div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div><div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div><div class="card-count-badge">${item.count}</div>`;
+                    w.prepend(img); g.appendChild(w);
                 });
                 list.appendChild(g);
             } else {
                 cards.forEach(item => {
                     const row = document.createElement('div'); row.className = 'card-row';
-                    const tags = (item.c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span> ' : '') + (item.c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '');
-                    row.innerHTML = `<div><div class="card-name">${item.c.jp.name} x${item.count} ${tags}</div><div class="card-info">${item.c.common.cost}コスト</div></div>
+                    row.innerHTML = `<div class="card-info-group"><div class="card-name">${item.c.jp.name} x${item.count}</div><div style="font-size:11px; color:#666;">${item.c.common.cost}コスト</div></div>
                                      <div class="action-btns"><button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button><button class="btn-minus-one" onclick="removeOne('${item.id}')">－</button><button class="btn-delete-all" onclick="removeAll('${item.id}')">×</button></div>`;
                     list.appendChild(row);
                 });
             }
         };
-        createSection(main, 'メインデッキ'); createSection(evo, 'エボルヴデッキ');
+        createSection(main, 'メイン'); createSection(evo, 'エボルヴ');
     }
 
     function updateManaCurve() {
@@ -265,8 +239,7 @@
         }
         const max = Math.max(...counts, 1);
         Array.from(document.getElementById('mana-curve').children).forEach((w, i) => {
-            w.querySelector('.bar').style.height = (counts[i] / max * 60) + 'px';
-            w.querySelector('.bar-count').innerText = counts[i]; w.querySelector('.bar-count').style.visibility = counts[i] > 0 ? 'visible' : 'hidden';
+            w.querySelector('.bar').style.height = (counts[i] / max * 50) + 'px';
         });
     }
 
