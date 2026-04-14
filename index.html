@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SVE プロフェッショナル・デッキビルダ―</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -35,28 +36,35 @@
         <div id="card-pool" class="scroll-area"></div>
     </div>
 
-    <div class="panel right-panel">
+    <div class="panel right-panel" id="deck-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h2 style="margin:0; font-size:18px;">デッキ (M:<span id="main-count">0</span> E:<span id="evolve-count">0</span>)</h2>
-            <button id="btn-toggle-deck-view" class="btn-view-toggle" onclick="toggleViewMode('deck')">画像表示に切替</button>
+            <div class="action-btns-header">
+                <button id="btn-toggle-deck-view" class="btn-view-toggle" onclick="toggleViewMode('deck')">画像表示に切替</button>
+                <button style="background:#a0aec0;" onclick="clearDeck()">全クリア</button>
+            </div>
         </div>
         <div class="mana-curve-container">
             <div class="chart-area" id="mana-curve">
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">0</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">1</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">2</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">3</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">4</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">5</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">6</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">7</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">8+</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">0</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">1</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">2</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">3</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">4</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">5</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">6</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">7</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">8+</span></div>
             </div>
         </div>
         <div id="deck-list" class="scroll-area"></div>
-        <button class="btn-export" onclick="exportToArena()">TCG-Arena用に出力</button>
-        <textarea id="export-text" rows="3" readonly placeholder="Output list..."></textarea>
-        <button class="btn-copy" style="background:#4a5568; width:100%; margin-top:5px;" onclick="copyToClipboard()">コピー</button>
+        
+        <div id="export-controls" style="margin-top:10px;">
+            <button class="btn-add" style="width:100%; margin-bottom:5px; background:#ed64a6;" onclick="exportAsImage()">デッキを画像として保存 (PNG)</button>
+            <button class="btn-add" style="width:100%; margin-bottom:5px; background:#48bb78;" onclick="exportToArena()">TCG-Arena形式で出力</button>
+            <textarea id="export-text" rows="3" readonly placeholder="Output list..." style="width:100%; box-sizing:border-box; margin-bottom:5px; font-size:11px;"></textarea>
+            <button style="background:#4a5568; width:100%;" onclick="copyToClipboard()">テキストをコピー</button>
+        </div>
     </div>
 </div>
 
@@ -82,10 +90,60 @@
     }, { rootMargin: '300px' });
 
     document.addEventListener('DOMContentLoaded', () => {
-        fetch('./master_card_data.json').then(r => r.json()).then(d => { masterData = d; renderCardPool(); });
+        // 下書きの読み込み (localStorage)
+        const saved = localStorage.getItem('sve-deck-draft');
+        if (saved) {
+            try { deck = JSON.parse(saved); } catch(e) { console.error("Load failed", e); }
+        }
+
+        fetch('./master_card_data.json').then(r => r.json()).then(d => { 
+            masterData = d; 
+            renderCardPool();
+            if (Object.keys(deck).length > 0) updateUI(); // 保存データがあれば反映
+        });
         fetch('./tribes.json').then(r => r.json()).then(d => { tribeList = Object.keys(d); });
         document.addEventListener('click', e => { if (!e.target.closest('.suggest-container')) document.getElementById('tribe-suggest-list').style.display = 'none'; });
     });
+
+    // 下書き保存 (updateUIの中で呼ぶ)
+    function saveDraft() {
+        localStorage.setItem('sve-deck-draft', JSON.stringify(deck));
+    }
+
+    function clearDeck() {
+        if (confirm("デッキをすべて空にしますか？")) {
+            deck = {};
+            updateUI();
+        }
+    }
+
+    // 画像書き出し機能
+    async function exportAsImage() {
+        const target = document.getElementById('deck-panel');
+        const controls = document.getElementById('export-controls');
+        const headerBtns = document.querySelector('.action-btns-header');
+        
+        // 書き出しに不要な要素を一時的に隠す
+        controls.style.display = 'none';
+        headerBtns.style.display = 'none';
+        
+        const canvas = await html2canvas(target, {
+            useCORS: true,
+            scale: 2, // 高解像度
+            backgroundColor: "#f4f7f9"
+        });
+        
+        // 戻す
+        controls.style.display = 'block';
+        headerBtns.style.display = 'flex';
+
+        const link = document.createElement('a');
+        link.download = `sve-deck-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    /* 以下、既存の関数に saveDraft() を追加 */
 
     function toggleViewMode(target) {
         if (target === 'lib') {
@@ -106,19 +164,19 @@
         if (isU) {
             u.push(`https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}_ura.png`,
                    `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}_back.png`,
-                   `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}_ura.png`,
-                   `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}u.png`);
+                   `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}_ura.png`);
         } else {
             u.push(`https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}.png`,
                    `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${b}_front.png`,
-                   `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}.png`,
-                   `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}_front.png`);
+                   `https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/${f}/${ub}.png`);
         }
         return [...new Set(u)].filter(v => v);
     }
 
     function loadImg(el) {
-        const urls = getUrls(el.dataset.id, masterData[el.dataset.id]);
+        const id = el.dataset.id;
+        if (!masterData[id]) return;
+        const urls = getUrls(id, masterData[id]);
         let i = 0;
         const tryLoad = () => {
             const t = new Image(); t.src = urls[i];
@@ -193,13 +251,19 @@
     function addCard(id) { if ((deck[id] || 0) < 3) { deck[id] = (deck[id] || 0) + 1; updateUI(); } }
     function removeOne(id) { if (deck[id]) { deck[id]--; if (!deck[id]) delete deck[id]; updateUI(); } }
     function removeAll(id) { if (deck[id]) { delete deck[id]; updateUI(); } }
-    function updateUI() { renderDeckList(); updateManaCurve(); }
+    
+    function updateUI() { 
+        renderDeckList(); 
+        updateManaCurve(); 
+        saveDraft(); // 保存を実行
+    }
 
     function renderDeckList() {
         const list = document.getElementById('deck-list'); list.innerHTML = '';
         let mc = 0; let ec = 0; const main = []; const evo = [];
         for (const id in deck) {
-            const c = masterData[id]; const item = { id, c, count: deck[id] };
+            const c = masterData[id]; if(!c) continue;
+            const item = { id, c, count: deck[id] };
             if (c.common.isEvolve || c.common.type === "Advance") { ec += deck[id]; evo.push(item); }
             else { mc += deck[id]; main.push(item); }
         }
@@ -215,20 +279,15 @@
                 cards.forEach(item => {
                     const w = document.createElement('div'); w.className = 'card-item-wrapper';
                     const img = document.createElement('img'); img.dataset.id = item.id; img.onclick = () => showDetails(item.id); imageObserver.observe(img);
-                    
-                    // 中央に＋ボタンを追加
-                    w.innerHTML = `
-                        <div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div>
-                        <div class="btn-remove-img btn-plus-img" onclick="addCard('${item.id}')">＋</div>
-                        <div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div>
-                        <div class="card-count-badge">${item.count}</div>`;
+                    w.innerHTML = `<div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div><div class="btn-remove-img btn-plus-img" onclick="addCard('${item.id}')">＋</div><div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div><div class="card-count-badge">${item.count}</div>`;
                     w.prepend(img); g.appendChild(w);
                 });
                 list.appendChild(g);
             } else {
                 cards.forEach(item => {
                     const row = document.createElement('div'); row.className = 'card-row';
-                    row.innerHTML = `<div class="card-info-group"><div class="card-name">${item.c.jp.name} x${item.count}</div><div style="font-size:11px; color:#666;">${item.c.common.cost}コスト</div></div>
+                    const evTag = item.c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span>' : '';
+                    row.innerHTML = `<div class="card-info-group"><div class="card-name">${item.c.jp.name} x${item.count} ${evTag}</div><div style="font-size:11px; color:#666;">${item.c.common.cost}コスト</div></div>
                                      <div class="action-btns">
                                          <button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button>
                                          <button class="btn-plus-one" onclick="addCard('${item.id}')">＋</button>
@@ -245,7 +304,7 @@
     function updateManaCurve() {
         const counts = new Array(9).fill(0);
         for (const id in deck) {
-            const c = masterData[id];
+            const c = masterData[id]; if(!c) continue;
             if (!c.common.isEvolve && c.common.type !== "Advance") { const cost = parseInt(c.common.cost) || 0; counts[cost >= 8 ? 8 : cost] += deck[id]; }
         }
         const max = Math.max(...counts, 1);
