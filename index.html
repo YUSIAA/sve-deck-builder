@@ -215,7 +215,13 @@
                 cards.forEach(item => {
                     const w = document.createElement('div'); w.className = 'card-item-wrapper';
                     const img = document.createElement('img'); img.dataset.id = item.id; img.onclick = () => showDetails(item.id); imageObserver.observe(img);
-                    w.innerHTML = `<div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div><div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div><div class="card-count-badge">${item.count}</div>`;
+                    
+                    // 中央に＋ボタンを追加
+                    w.innerHTML = `
+                        <div class="btn-remove-img btn-minus-img" onclick="removeOne('${item.id}')">－</div>
+                        <div class="btn-remove-img btn-plus-img" onclick="addCard('${item.id}')">＋</div>
+                        <div class="btn-remove-img btn-delete-img" onclick="removeAll('${item.id}')">×</div>
+                        <div class="card-count-badge">${item.count}</div>`;
                     w.prepend(img); g.appendChild(w);
                 });
                 list.appendChild(g);
@@ -223,7 +229,12 @@
                 cards.forEach(item => {
                     const row = document.createElement('div'); row.className = 'card-row';
                     row.innerHTML = `<div class="card-info-group"><div class="card-name">${item.c.jp.name} x${item.count}</div><div style="font-size:11px; color:#666;">${item.c.common.cost}コスト</div></div>
-                                     <div class="action-btns"><button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button><button class="btn-minus-one" onclick="removeOne('${item.id}')">－</button><button class="btn-delete-all" onclick="removeAll('${item.id}')">×</button></div>`;
+                                     <div class="action-btns">
+                                         <button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button>
+                                         <button class="btn-plus-one" onclick="addCard('${item.id}')">＋</button>
+                                         <button class="btn-minus-one" onclick="removeOne('${item.id}')">－</button>
+                                         <button class="btn-delete-all" onclick="removeAll('${item.id}')">×</button>
+                                     </div>`;
                     list.appendChild(row);
                 });
             }
