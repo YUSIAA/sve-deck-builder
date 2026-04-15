@@ -39,30 +39,30 @@
     <div class="panel right-panel" id="deck-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h2 style="margin:0; font-size:18px;">デッキ (M:<span id="main-count">0</span> E:<span id="evolve-count">0</span>)</h2>
-            <div class="action-btns-header">
+            <div id="ui-controls-top" class="action-btns">
                 <button id="btn-toggle-deck-view" class="btn-view-toggle" onclick="toggleViewMode('deck')">画像表示に切替</button>
                 <button style="background:#a0aec0;" onclick="clearDeck()">全クリア</button>
             </div>
         </div>
         <div class="mana-curve-container">
             <div class="chart-area" id="mana-curve">
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">0</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">1</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">2</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">3</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">4</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">5</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">6</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">7</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">8+</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">0</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">1</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">2</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">3</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">4</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">5</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">6</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">7</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">8+</span></div>
             </div>
         </div>
         <div id="deck-list" class="scroll-area"></div>
         
-        <div id="export-controls" style="margin-top:10px;">
-            <button class="btn-add" style="width:100%; margin-bottom:5px; background:#ed64a6;" onclick="exportAsImage()">デッキを画像として保存 (PNG)</button>
-            <button class="btn-add" style="width:100%; margin-bottom:5px; background:#48bb78;" onclick="exportToArena()">TCG-Arena形式で出力</button>
-            <textarea id="export-text" rows="3" readonly placeholder="Output list..." style="width:100%; box-sizing:border-box; margin-bottom:5px; font-size:11px;"></textarea>
+        <div id="ui-controls-bottom" style="margin-top:10px;">
+            <button style="background:#ed64a6; width:100%; margin-bottom:5px;" onclick="exportAsImage()">デッキを画像で保存</button>
+            <button style="background:#48bb78; width:100%; margin-bottom:5px;" onclick="exportToArena()">TCG-Arena用出力</button>
+            <textarea id="export-text" rows="3" readonly placeholder="Output list..." style="width:100%; box-sizing:border-box; font-size:11px; margin-bottom:5px;"></textarea>
             <button style="background:#4a5568; width:100%;" onclick="copyToClipboard()">テキストをコピー</button>
         </div>
     </div>
@@ -74,8 +74,8 @@
         <div class="modal-right">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <div id="modal-card-name" class="modal-title"></div>
-            <div id="modal-card-tribe" style="background:#f1f5f9; padding:5px 12px; border-radius:6px; font-size:13px; display:inline-block; margin-bottom:15px; color:#475569;"></div>
-            <div id="modal-card-text" style="font-size:14px; line-height:1.6; white-space:pre-wrap; border-top:1px solid #eee; padding-top:10px;"></div>
+            <div id="modal-card-tribe" style="background:#f1f5f9; padding:5px 12px; border-radius:6px; font-size:13px; display:inline-block; color:#475569;"></div>
+            <div id="modal-card-text" class="modal-text"></div>
         </div>
     </div>
 </div>
@@ -90,60 +90,47 @@
     }, { rootMargin: '300px' });
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 下書きの読み込み (localStorage)
-        const saved = localStorage.getItem('sve-deck-draft');
-        if (saved) {
-            try { deck = JSON.parse(saved); } catch(e) { console.error("Load failed", e); }
-        }
+        // ローカルストレージから復元
+        const saved = localStorage.getItem('sve_deck_autosave');
+        if (saved) { try { deck = JSON.parse(saved); } catch(e) { console.error("Restore failed", e); } }
 
         fetch('./master_card_data.json').then(r => r.json()).then(d => { 
             masterData = d; 
             renderCardPool();
-            if (Object.keys(deck).length > 0) updateUI(); // 保存データがあれば反映
+            if (Object.keys(deck).length > 0) updateUI();
         });
         fetch('./tribes.json').then(r => r.json()).then(d => { tribeList = Object.keys(d); });
         document.addEventListener('click', e => { if (!e.target.closest('.suggest-container')) document.getElementById('tribe-suggest-list').style.display = 'none'; });
     });
 
-    // 下書き保存 (updateUIの中で呼ぶ)
-    function saveDraft() {
-        localStorage.setItem('sve-deck-draft', JSON.stringify(deck));
+    // --- 新機能: 画像保存 ---
+    async function exportAsImage() {
+        const target = document.getElementById('deck-panel');
+        const topControls = document.getElementById('ui-controls-top');
+        const bottomControls = document.getElementById('ui-controls-bottom');
+        
+        // ボタン類を一時的に隠す
+        topControls.style.visibility = 'hidden';
+        bottomControls.style.display = 'none';
+        
+        const canvas = await html2canvas(target, { useCORS: true, scale: 2, backgroundColor: "#f4f7f9" });
+        
+        topControls.style.visibility = 'visible';
+        bottomControls.style.display = 'block';
+
+        const link = document.createElement('a');
+        link.download = `SVE-Deck-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
     }
 
+    // --- 新機能: 全クリア ---
     function clearDeck() {
         if (confirm("デッキをすべて空にしますか？")) {
             deck = {};
             updateUI();
         }
     }
-
-    // 画像書き出し機能
-    async function exportAsImage() {
-        const target = document.getElementById('deck-panel');
-        const controls = document.getElementById('export-controls');
-        const headerBtns = document.querySelector('.action-btns-header');
-        
-        // 書き出しに不要な要素を一時的に隠す
-        controls.style.display = 'none';
-        headerBtns.style.display = 'none';
-        
-        const canvas = await html2canvas(target, {
-            useCORS: true,
-            scale: 2, // 高解像度
-            backgroundColor: "#f4f7f9"
-        });
-        
-        // 戻す
-        controls.style.display = 'block';
-        headerBtns.style.display = 'flex';
-
-        const link = document.createElement('a');
-        link.download = `sve-deck-${new Date().getTime()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
-    /* 以下、既存の関数に saveDraft() を追加 */
 
     function toggleViewMode(target) {
         if (target === 'lib') {
@@ -174,8 +161,7 @@
     }
 
     function loadImg(el) {
-        const id = el.dataset.id;
-        if (!masterData[id]) return;
+        const id = el.dataset.id; if (!masterData[id]) return;
         const urls = getUrls(id, masterData[id]);
         let i = 0;
         const tryLoad = () => {
@@ -187,10 +173,11 @@
     }
 
     function showDetails(id) {
-        const c = masterData[id]; const mImg = document.getElementById('modal-card-img'); const urls = getUrls(id, c); let i = 0;
-        mImg.onerror = function() { i++; if (i < urls.length) this.src = urls[i]; else this.src = ""; };
+        const c = masterData[id]; const mImg = document.getElementById('modal-card-img'); const urls = getUrls(id, c);
+        let i = 0; mImg.onerror = function() { i++; if (i < urls.length) this.src = urls[i]; else this.src = ""; };
         mImg.src = urls[0];
-        document.getElementById('modal-card-name').innerText = c.jp.name;
+        const evTag = c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span>' : '';
+        document.getElementById('modal-card-name').innerHTML = c.jp.name + " " + evTag;
         document.getElementById('modal-card-tribe').innerText = c.jp.tribe || "なし";
         document.getElementById('modal-card-text').innerText = c.jp.text || "テキストなし";
         document.getElementById('card-modal').style.display = 'block';
@@ -255,7 +242,8 @@
     function updateUI() { 
         renderDeckList(); 
         updateManaCurve(); 
-        saveDraft(); // 保存を実行
+        // 自動保存実行
+        localStorage.setItem('sve_deck_autosave', JSON.stringify(deck));
     }
 
     function renderDeckList() {
@@ -298,7 +286,7 @@
                 });
             }
         };
-        createSection(main, 'メイン'); createSection(evo, 'エボルヴ');
+        createSection(main, 'メインデッキ'); createSection(evo, 'エボルヴデッキ');
     }
 
     function updateManaCurve() {
