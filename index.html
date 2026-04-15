@@ -39,7 +39,7 @@
     <div class="panel right-panel" id="deck-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h2 style="margin:0; font-size:18px;">デッキ (M:<span id="main-count">0</span> E:<span id="evolve-count">0</span>)</h2>
-            <div class="action-btns-header">
+            <div class="action-btns-header" style="display:flex; gap:5px;">
                 <button id="btn-toggle-deck-view" class="btn-view-toggle" onclick="toggleViewMode('deck')">画像表示に切替</button>
                 <button style="background:#a0aec0; color:white; font-size:11px;" onclick="clearDeck()">全クリア</button>
             </div>
@@ -47,15 +47,15 @@
         
         <div class="mana-curve-container">
             <div class="chart-area" id="mana-curve">
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">0</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">1</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">2</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">3</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">4</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">5</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">6</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">7</span></div>
-                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label">8+</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">0</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">1</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">2</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">3</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">4</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">5</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">6</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">7</span></div>
+                <div class="bar-wrapper"><div class="bar" style="height:0px"></div><span class="bar-label" style="font-size:9px">8+</span></div>
             </div>
         </div>
 
@@ -87,17 +87,14 @@
     let viewModeLib = 'list'; let viewModeDeck = 'list';
     const classMap = { 'Forestcraft': 'エルフ', 'Swordcraft': 'ロイヤル', 'Runecraft': 'ウィッチ', 'Dragoncraft': 'ドラゴン', 'Abysscraft': 'ナイトメア', 'Havencraft': 'ビショップ', 'Neutral': 'ニュートラル' };
 
-    // Lazy Load / 高速読み込み用 Observer
     const imageObserver = new IntersectionObserver((entries, obs) => {
         entries.forEach(e => { if (e.isIntersecting) { loadImg(e.target); obs.unobserve(e.target); } });
     }, { rootMargin: '300px' });
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 下書き読み込み (localStorage)
         const saved = localStorage.getItem('sve-deck-draft');
         if (saved) { try { deck = JSON.parse(saved); } catch(e) { console.error("Load failed", e); } }
 
-        // 静的JSONファイルの取得
         fetch('./master_card_data.json').then(r => r.json()).then(d => { 
             masterData = d; 
             renderCardPool();
@@ -107,34 +104,21 @@
         document.addEventListener('click', e => { if (!e.target.closest('.suggest-container')) document.getElementById('tribe-suggest-list').style.display = 'none'; });
     });
 
-    // 内部保存
     function saveDraft() { localStorage.setItem('sve-deck-draft', JSON.stringify(deck)); }
 
     function clearDeck() {
-        if (confirm("デッキをすべて空にしますか？")) {
-            deck = {};
-            updateUI();
-        }
+        if (confirm("デッキをすべて空にしますか？")) { deck = {}; updateUI(); }
     }
 
-    // 画像書き出しロジック
     async function exportAsImage() {
         const target = document.getElementById('deck-panel');
         const controls = document.getElementById('export-controls');
         const headerBtns = document.querySelector('.action-btns-header');
-        
         controls.style.display = 'none';
         headerBtns.style.display = 'none';
-        
-        const canvas = await html2canvas(target, {
-            useCORS: true,
-            scale: 2,
-            backgroundColor: "#f4f7f9"
-        });
-        
+        const canvas = await html2canvas(target, { useCORS: true, scale: 2, backgroundColor: "#f4f7f9" });
         controls.style.display = 'block';
         headerBtns.style.display = 'flex';
-
         const link = document.createElement('a');
         link.download = `sve-deck-${new Date().getTime()}.png`;
         link.href = canvas.toDataURL();
@@ -194,6 +178,7 @@
 
     function closeModal() { document.getElementById('card-modal').style.display = 'none'; }
 
+    // --- ここが重要：タグ判定ロジックの強化 ---
     function renderCardPool() {
         const pool = document.getElementById('card-pool'); pool.innerHTML = '';
         pool.className = 'scroll-area' + (viewModeLib === 'gallery' ? ' gallery-grid' : '');
@@ -204,8 +189,14 @@
             div.dataset.name = c.jp.name; div.dataset.text = c.jp.text || ""; div.dataset.tribe = c.jp.tribe || ""; div.dataset.class = c.common.class; div.dataset.cost = c.common.cost;
             if (viewModeLib === 'list') {
                 const jpClass = classMap[c.common.class] || c.common.class;
-                const evTag = c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span>' : '';
-                const adTag = c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '';
+                
+                // 大文字小文字に関わらず判定
+                const isEvolve = c.common.isEvolve === true;
+                const isAdvance = (c.common.type && c.common.type.toLowerCase() === 'advance');
+                
+                const evTag = isEvolve ? '<span class="evolve-tag">EVOLVE</span>' : '';
+                const adTag = isAdvance ? '<span class="advance-tag">ADVANCE</span>' : '';
+                
                 div.innerHTML = `<div class="card-info-group"><div class="card-name">${c.jp.name} ${evTag}${adTag}</div><div style="font-size:11px; color:#666;">${jpClass} | ${c.common.cost}コスト</div></div>
                                  <div class="action-btns"><button class="btn-detail" onclick="showDetails('${id}')">詳細</button><button class="btn-add" onclick="addCard('${id}')">追加</button></div>`;
             } else {
@@ -248,7 +239,6 @@
     function addCard(id) { if ((deck[id] || 0) < 3) { deck[id] = (deck[id] || 0) + 1; updateUI(); } }
     function removeOne(id) { if (deck[id]) { deck[id]--; if (!deck[id]) delete deck[id]; updateUI(); } }
     function removeAll(id) { if (deck[id]) { delete deck[id]; updateUI(); } }
-    
     function updateUI() { renderDeckList(); updateManaCurve(); saveDraft(); }
 
     function renderDeckList() {
@@ -257,7 +247,11 @@
         for (const id in deck) {
             const c = masterData[id]; if(!c) continue;
             const item = { id, c, count: deck[id] };
-            if (c.common.isEvolve || c.common.type === "Advance") { ec += deck[id]; evo.push(item); }
+            
+            // デッキ分け判定も柔軟に
+            const isEvolveSection = (c.common.isEvolve === true || (c.common.type && c.common.type.toLowerCase() === 'advance'));
+            
+            if (isEvolveSection) { ec += deck[id]; evo.push(item); }
             else { mc += deck[id]; main.push(item); }
         }
         const deckSorter = (a, b) => (parseInt(a.c.common.cost) || 0) - (parseInt(b.c.common.cost) || 0) || a.c.jp.name.localeCompare(b.c.jp.name, 'ja');
@@ -279,8 +273,10 @@
             } else {
                 cards.forEach(item => {
                     const row = document.createElement('div'); row.className = 'card-row';
-                    const evTag = item.c.common.isEvolve ? '<span class="evolve-tag">EVOLVE</span>' : '';
-                    const adTag = item.c.common.type === "Advance" ? '<span class="advance-tag">ADVANCE</span>' : '';
+                    const isE = item.c.common.isEvolve === true;
+                    const isA = (item.c.common.type && item.c.common.type.toLowerCase() === 'advance');
+                    const evTag = isE ? '<span class="evolve-tag">EVOLVE</span>' : '';
+                    const adTag = isA ? '<span class="advance-tag">ADVANCE</span>' : '';
                     row.innerHTML = `<div class="card-info-group"><div class="card-name">${item.c.jp.name} x${item.count} ${evTag}${adTag}</div><div style="font-size:11px; color:#666;">${item.c.common.cost}コスト</div></div>
                                      <div class="action-btns">
                                          <button class="btn-detail" onclick="showDetails('${item.id}')">詳細</button>
@@ -299,7 +295,8 @@
         const counts = new Array(9).fill(0);
         for (const id in deck) {
             const c = masterData[id]; if(!c) continue;
-            if (!c.common.isEvolve && c.common.type !== "Advance") { const cost = parseInt(c.common.cost) || 0; counts[cost >= 8 ? 8 : cost] += deck[id]; }
+            const isEOrA = (c.common.isEvolve === true || (c.common.type && c.common.type.toLowerCase() === 'advance'));
+            if (!isEOrA) { const cost = parseInt(c.common.cost) || 0; counts[cost >= 8 ? 8 : cost] += deck[id]; }
         }
         const max = Math.max(...counts, 1);
         Array.from(document.getElementById('mana-curve').children).forEach((w, i) => {
