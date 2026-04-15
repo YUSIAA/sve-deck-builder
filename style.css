@@ -27,7 +27,7 @@ button { cursor: pointer; border: none; border-radius: 6px; padding: 6px 12px; f
 .btn-minus-one { background: #f39c12; }
 .btn-delete-all { background: #e74c3c; }
 
-/* EVOタグ修正 (背景色復活) */
+/* EVOタグ修正（再掲） */
 .evolve-tag { 
     font-size: 9px; 
     color: #fff !important; 
@@ -36,8 +36,23 @@ button { cursor: pointer; border: none; border-radius: 6px; padding: 6px 12px; f
     border-radius: 3px; 
     font-weight: bold; 
     display: inline-block;
-    margin-left: 5px;
+    margin-left: 4px;
+    vertical-align: middle;
 }
+
+/* ADVANCEタグ追加 */
+.advance-tag { 
+    font-size: 9px; 
+    color: #fff !important; 
+    background-color: #8e44ad !important; 
+    padding: 2px 5px; 
+    border-radius: 3px; 
+    font-weight: bold; 
+    display: inline-block;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
 
 /* リスト表示の崩れ修正 */
 .card-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f4f8; gap: 10px; }
